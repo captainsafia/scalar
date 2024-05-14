@@ -146,9 +146,10 @@ export type ExampleResponseHeaders = Record<
 >
 
 export type Tag = {
-  name: string
-  description: string
-  operations: TransformedOperation[]
+  'name': string
+  'x-displayName'?: string
+  'description': string
+  'operations': TransformedOperation[]
 }
 export type Parameter = {
   name: string

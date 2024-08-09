@@ -42,3 +42,17 @@ dotnet build
 dotnet pack --configuration Release
 # then ping marc until we set up ci auto release!
 ```
+
+## Set up Scalar Options
+
+Modified by [john-shika](https://github.com/john-shika/scalar), you can config OpenApi Specify Path \(0-0)/ yee!
+
+```c#
+app.MapOpenApi("/openapi/{documentName}.json");
+
+app.MapScalarApiReference((ScalarOptions options) =>
+{
+    options.OpenApiSpecPath = "/openapi/{documentName}.json";
+    options.Theme = "purple";
+});
+```

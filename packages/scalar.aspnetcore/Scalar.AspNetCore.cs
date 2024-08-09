@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -26,35 +27,32 @@ namespace Scalar.AspNetCore
         {
             var options = new ScalarOptions();
             configureOptions(options);
-
             var configurationJson = JsonSerializer.Serialize(options, JsonSerializerOptions);
-
+            var configurationJsonBytes = Encoding.UTF8.GetBytes(configurationJson);
+            var configurationJsonBytesBase64 = Convert.ToBase64String(configurationJsonBytes);
             return endpoints.MapGet(options.EndpointPathPrefix + "/{documentName}", (string documentName) =>
-                {
-                    var title = options.Title ?? $"Scalar API Reference -- {documentName}";
-                    return Results.Content(
-                        $$"""
-                          <!doctype html>
-                          <html>
-                          <head>
-                              <title>{{title}}</title>
-                              <meta charset="utf-8" />
-                              <meta name="viewport" content="width=device-width, initial-scale=1" />
-                          </head>
-                          <body>
-                              <script id="api-reference" data-url="/openapi/{{documentName}}.json"></script>
-                              <script>
-                              var configuration = {{configurationJson}}
-
-                              document.getElementById('api-reference').dataset.configuration =
-                                  JSON.stringify(configuration)
-                              </script>
-                              <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
-                          </body>
-                          </html>
-                          """, "text/html");
-                })
-                .ExcludeFromDescription();
+            {
+                var title = options.Title ?? "Scalar API Reference -- " + documentName;
+                var openApiSpecPath = options.OpenApiSpecPath.Replace("{documentName}", documentName);
+                var contentHtml = $$"""
+                                    <!doctype html>
+                                    <html>
+                                        <head>
+                                            <title>{{title}}</title>
+                                            <meta charset="utf-8" />
+                                            <meta name="viewport" content="width=device-width, initial-scale=1" />
+                                        </head>
+                                        <body>
+                                            <script id="api-reference" data-url="{{openApiSpecPath}}"></script>
+                                            <script>
+                                                document.getElementById('api-reference').dataset.configuration = atob('{{configurationJsonBytesBase64}}')
+                                            </script>
+                                            <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+                                        </body>
+                                    </html>
+                                    """;
+                return TypedResults.Content(contentHtml, "text/html");
+            }).ExcludeFromDescription();
         }
     }
 }

@@ -6,6 +6,9 @@ namespace Scalar.AspNetCore;
 public class ScalarOptions
 {
     [JsonIgnore]
+    public string OpenApiSpecPath { get; set; } = "/openapi/{documentName}.json";
+    
+    [JsonIgnore]
     public string EndpointPathPrefix { get; set; } = "/scalar";
 
     [JsonIgnore] 
